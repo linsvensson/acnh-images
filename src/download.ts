@@ -9,7 +9,7 @@ import { variants } from './util/variants';
  * The main entry point for the program.
  * @param  format The format representing how to download the image as.
  */
-export async function main(format: string): Promise<void> {
+export async function main(newVersion: string): Promise<void> {
   // Initialize an array containing every item from the database, as every entry
   // is an array, we'll have an array that's two levels deep. So we use the flat
   // method to ensure that every item is on the first level.
@@ -41,7 +41,7 @@ export async function main(format: string): Promise<void> {
 
     // Save each image as the given format.
     for (const key of keys) {
-      await download(item, key, format, spinner);
+      await download(item, key, spinner, newVersion);
     }
   }
 

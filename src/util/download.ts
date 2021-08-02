@@ -4,7 +4,6 @@ import { existsSync } from 'fs';
 import ora from 'ora';
 import { basename, dirname } from 'path';
 
-import { convert } from './convert';
 import { png } from './png';
 
 /**
@@ -31,7 +30,7 @@ const options = {
  * @param  spinner The Ora instance.
  * @return         Determines if the program should try to continue downloading.
  */
-function handler(error: any, attempt: number, spinner: ora.Ora): boolean {
+function handler(error: unknown, attempt: number, spinner: ora.Ora): boolean {
   spinner.fail('error\n');
 
   // Throw an error if the attempt amount is the maximum allowed .
@@ -56,7 +55,7 @@ function handler(error: any, attempt: number, spinner: ora.Ora): boolean {
  * @param  format  The format representing how to download the image as.
  * @param  spinner The Ora instance.
  */
-export async function download(item: obj, key: string, format: string, spinner: ora.Ora): Promise<void> {
+export async function download(item: obj, key: string, spinner: ora.Ora, newVersion: string): Promise<void> {
   // We initialize a new URL instance for the link as some items have unescped
   // characters in their name, an example being the villager Renée. When
   // initializing a new URL, it escapes any special characters from the input.
@@ -64,7 +63,7 @@ export async function download(item: obj, key: string, format: string, spinner: 
 
   // Get the path for the item's location, replacing any special keys with the
   // values they represent, along with making sure it ends with '.png'.
-  const path: string = png(convert(item, key, format));
+  const path: string = png(key);
 
   // Downloading every image takes a good amount of time, and usually, people
   // will call this program whenever a new update happens, so we check if the
@@ -74,12 +73,15 @@ export async function download(item: obj, key: string, format: string, spinner: 
     return;
   }
 
-  spinner.start(`downloading: [${item.sourceSheet}] ${item.name} as ${path}`);
+  const version = item.versionAdded;
+  if (version == newVersion) {
+    spinner.start(`downloading: [${item.sourceSheet}] ${item.name} as ${path}`);
 
-  await backOff(() => downloadUrl(link, dirname(path), { filename: basename(path) }), {
-    ...options,
-    retry: (error: any, attempt: number) => handler(error, attempt, spinner),
-  }).catch(() =>
-    console.log(`Skipped attempting to download ${item.name} from ${link}, as an error occurred 5 times.`)
-  );
+    await backOff(() => downloadUrl(link, dirname(path), { filename: basename(path) }), {
+      ...options,
+      retry: (error: unknown, attempt: number) => handler(error, attempt, spinner),
+    }).catch(() =>
+      console.log(`Skipped attempting to download ${item.name} from ${link}, as an error occurred 5 times.`)
+    );
+  }
 }
