@@ -74,6 +74,8 @@ export async function download(item: obj, key: string, format: string, spinner: 
     return;
   }
 
+  const version = item.versionAdded;
+  if (version != '1.11.0') return;
   spinner.start(`downloading: [${item.sourceSheet}] ${item.name} as ${path}`);
 
   await backOff(() => downloadUrl(link, dirname(path), { filename: basename(path) }), {
