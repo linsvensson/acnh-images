@@ -80,7 +80,6 @@ export function convert(item: obj, key: string, format: string): string {
 
         // If the key actually exists on the item, we'll grab it's value,
         // otherwise, we'll use an empty string.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const value: any = item.hasOwnProperty(key) ? item[key] : '';
 
         // Replace all instances of the term with the value.
